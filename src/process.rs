@@ -3,6 +3,7 @@
 use std;
 use std::fs::File;
 use std::process::Command;
+use std::os::fd::BorrowedFd;
 use std::os::unix::process::CommandExt;
 use std::os::unix::io::{FromRawFd, AsRawFd};
 use std::{thread, time};
@@ -114,10 +115,12 @@ impl PtyProcess {
                     dup2(slave_fd, STDOUT_FILENO)?;
                     dup2(slave_fd, STDERR_FILENO)?;
 
+                    let stdin_fd = unsafe { BorrowedFd::borrow_raw(STDIN_FILENO) };
+
                     // set echo off
-                    let mut flags = termios::tcgetattr(STDIN_FILENO)?;
+                    let mut flags = termios::tcgetattr(stdin_fd)?;
                     flags.local_flags &= !termios::LocalFlags::ECHO;
-                    termios::tcsetattr(STDIN_FILENO, termios::SetArg::TCSANOW, &flags)?;
+                    termios::tcsetattr(stdin_fd, termios::SetArg::TCSANOW, &flags)?;
 
                     command.exec();
                     Err(nix::Error::last())

@@ -11,7 +11,7 @@ keywords    = ["pty", "automation", "testing", "expect", "pexpect"]
 readme      = "README.md"
 
 [dependencies]
-nix = "0.26"
+nix = { version = "0.27", features = ["fs", "process", "signal", "term"] }
 regex = "1"
 error-chain = "0.12"
 tempfile = "3"
